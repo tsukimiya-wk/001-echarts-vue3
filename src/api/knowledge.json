@@ -1,0 +1,38 @@
+{
+    "data": [
+        { "name": "数学" },
+        { "name": "数据可视化" },
+        { "name": "Web" },
+        { "name": "JavaScript" },
+        { "name": "CSS" },
+        { "name": "HTML" },
+        { "name": "Python" },
+        { "name": "golang" }
+    ],
+    "links": [
+        {
+            "source": "数据可视化",
+            "target": "Web"
+        },
+        {
+            "source": "数据可视化",
+            "target": "Python"
+        },
+        {
+            "source": "数据可视化",
+            "target": "数学"
+        },
+        {
+            "source": "Web",
+            "target": "HTML"
+        },
+        {
+            "source": "Web",
+            "target": "CSS"
+        },
+        {
+            "source": "Web",
+            "target": "JavaScript"
+        }
+    ]
+}
