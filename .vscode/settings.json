@@ -1,3 +1,8 @@
 {
-    "stylelint.validate": ["vue"]
+    "stylelint.validate": [
+        "vue"
+    ],
+    "cSpell.words": [
+        "echarts"
+    ]
 }
