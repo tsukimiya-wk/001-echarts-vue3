@@ -3,6 +3,7 @@
         "vue"
     ],
     "cSpell.words": [
-        "echarts"
+        "echarts",
+        "unref"
     ]
 }
