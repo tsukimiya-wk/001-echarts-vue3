@@ -18,11 +18,22 @@ type EChartsOption = echarts.ComposeOption<
 >;
 
 interface globalChartType {
-    [x: string]: echarts.ECharts
+    [x: string]: echarts.ECharts;
 }
+
+type dataSetType = ShallowReactive<{
+    data: {
+        name: string;
+    }[];
+    links: {
+        source: string;
+        target: string;
+    }[];
+}>;
 
 const klg = shallowReactive(knowledge);
 const val = ref<string>("");
+const deps = ref<string>("");
 const glb = shallowReactive<globalChartType>({});
 
 const chartDom = ref(null);
@@ -59,21 +70,74 @@ const drawChart = (option?: EChartsOption): void => {
 };
 
 onMounted(() => {
-    drawChart(options as EChartsOption); 
+    drawChart(options as EChartsOption);
 });
 
-const addData = ((dataSet: { name: string; }[], mount: ShallowReactive<globalChartType>, option: EChartsOption = options) => () => {
-    const value = unref(val.value);
-    dataSet.push({"name": value});
-    mount.myChart.setOption(option);
-    val.value = "";
-})(klg.data, glb, options);
+const hasDataTarget = (dataSet: dataSetType, target: string = "") => {
+    for (const data of dataSet.data) {
+        if (data.name === target) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+const hasLinked = (dataSet: dataSetType, source: string, target: string) => {
+    return dataSet.links.some((data) => data.source === source && data.target === target);
+}
+
+const addData = (
+    (
+        dataSet: dataSetType,
+        mount: ShallowReactive<globalChartType>,
+        option: EChartsOption = options,
+    ) =>
+    () => {
+        const target = unref(val.value);
+        if (!hasDataTarget(dataSet, target)) {
+            dataSet.data.push({ name: target });
+        }
+
+        // \uFF0C 是中文的逗号
+        const depsArr = unref(deps.value)
+            .split(/[,\uFF0C\s+]/)
+            .filter((e) => !!e);
+        depsArr.forEach(
+            ((dataSet: dataSetType, target: string) => (dep) => {
+                if (!hasDataTarget(dataSet, dep)) {
+                    dataSet.data.push({
+                        name: dep,
+                    });
+                }
+
+                if (!hasLinked(dataSet, target, dep)) {
+                    dataSet.links.push({
+                        source: target,
+                        target: dep,
+                    });
+                }
+            })(dataSet, target),
+        );
+
+        mount.myChart.setOption(option);
+        val.value = "";
+        deps.value = "";
+    }
+)(klg, glb, options);
 </script>
 
 <template>
     <form action="." method="post" @submit.prevent>
-        <label for="addData">添加数据</label><input type="text" id="addData" v-model="val">
-        <button type="submit" @click="addData">添加数据</button>
+        <label for="addData">添加数据</label
+        ><input type="text" id="addData" v-model="val" placeholder="添加数据" />
+        <label for="addDeps">添加数据依赖</label
+        ><input
+            type="text"
+            id="addDeps"
+            v-model="deps"
+            placeholder="添加数据的依赖项, 用中/英文逗号, 或是空格隔开各个依赖" />
+        <button type="submit" @click="addData">添加数据及依赖</button>
     </form>
     <div ref="chartDom" id="chartDom"></div>
 </template>

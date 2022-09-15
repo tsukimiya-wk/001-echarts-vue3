@@ -1,9 +1,4 @@
 {
-    "stylelint.validate": [
-        "vue"
-    ],
-    "cSpell.words": [
-        "echarts",
-        "unref"
-    ]
+    "stylelint.validate": ["vue"],
+    "cSpell.words": ["echarts", "unref"]
 }
