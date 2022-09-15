@@ -73,6 +73,20 @@ onMounted(() => {
     drawChart(options as EChartsOption);
 });
 
+const hasDataTarget = (dataSet: dataSetType, target: string = "") => {
+    for (const data of dataSet.data) {
+        if (data.name === target) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+const hasLinked = (dataSet: dataSetType, source: string, target: string) => {
+    return dataSet.links.some((data) => data.source === source && data.target === target);
+}
+
 const addData = (
     (
         dataSet: dataSetType,
@@ -80,26 +94,35 @@ const addData = (
         option: EChartsOption = options,
     ) =>
     () => {
-        const value = unref(val.value);
-        dataSet.data.push({ name: value });
+        const target = unref(val.value);
+        if (!hasDataTarget(dataSet, target)) {
+            dataSet.data.push({ name: target });
+        }
 
+        // \uFF0C 是中文的逗号
         const depsArr = unref(deps.value)
             .split(/[,\uFF0C\s+]/)
             .filter((e) => !!e);
         depsArr.forEach(
             ((dataSet: dataSetType, target: string) => (dep) => {
-                dataSet.data.push({
-                    "name": dep,
-                })
-                dataSet.links.push({
-                    source: target,
-                    target: dep,
-                });
-            })(dataSet, value),
+                if (!hasDataTarget(dataSet, dep)) {
+                    dataSet.data.push({
+                        name: dep,
+                    });
+                }
+
+                if (!hasLinked(dataSet, target, dep)) {
+                    dataSet.links.push({
+                        source: target,
+                        target: dep,
+                    });
+                }
+            })(dataSet, target),
         );
 
         mount.myChart.setOption(option);
         val.value = "";
+        deps.value = "";
     }
 )(klg, glb, options);
 </script>
